@@ -1,0 +1,29 @@
+🧠 Étapes logiques d’un reverse shell en assembleur
+
+1. **Créer un socket**
+    - Utiliser un appel système (`socket`) pour créer un socket TCP/IPv4.
+    - En assembleur, cela passe par une configuration manuelle des registres pour appeler le bon syscall.
+
+2. **Se connecter à une adresse distante**
+    - Utiliser le syscall `connect` pour établir une connexion vers l’IP et le port de l’attaquant.
+    - Cela nécessite de construire une structure `sockaddr_in` avec l’adresse et le port (en format réseau).
+
+3. **Rediriger les descripteurs de fichiers**
+    - Utiliser `dup2` pour dupliquer le descripteur du socket vers :
+      - `stdin` (0)
+      - `stdout` (1)
+      - `stderr` (2)
+    - Ainsi, toute commande ou sortie passera par le réseau.
+
+4. **Exécuter un shell**
+    - Appeler `execve` (ou un équivalent) pour exécuter un shell, typiquement `/bin/sh`.
+    - Cela permet à l’attaquant de taper des commandes comme s’il était en local.
+
+---
+
+⚠️ **Complexité spécifique à l’assembleur**
+- En assembleur, tout doit être fait à la main : préparation des registres, gestion de la pile, encodage des structures comme `sockaddr_in`, etc.
+- Il faut aussi faire attention à :
+  - L’alignement mémoire.
+  - L’absence de chaînes nulles si c’est dans un shellcode.
+  - La taille du shellcode (si utilisé à des fins d’injection).
